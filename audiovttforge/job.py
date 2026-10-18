@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import os
 import shutil
-from dataclasses import dataclass
+import sys
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -44,6 +45,10 @@ def resolve_tool(
     from_environment = os.environ.get(environment_name)
     if from_environment:
         return Path(from_environment).expanduser()
+    if getattr(sys, "frozen", False):
+        bundled = Path(sys.executable).parent / "tools" / "ffmpeg" / f"{executable_name}.exe"
+        if bundled.is_file():
+            return bundled
     if default.is_file():
         return default
     found = shutil.which(executable_name)
@@ -89,8 +94,8 @@ class JobSpec:
     font_shadow: int = 1
     subtitle_margin: int = 48
     audio_codec: str = "aac"
-    ffmpeg: Path = DEFAULT_FFMPEG
-    ffprobe: Path = DEFAULT_FFPROBE
+    ffmpeg: Path = field(default_factory=default_ffmpeg)
+    ffprobe: Path = field(default_factory=default_ffprobe)
     merge_subtitles: bool = False
 
     @classmethod

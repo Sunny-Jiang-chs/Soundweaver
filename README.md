@@ -24,7 +24,13 @@
 - 可以通过原生选择器指定输出目录，完成后直接打开结果所在文件夹。
 - 同一套界面通过 REST API 扫描素材、提交任务、查看进度和取消任务。
 
-## 环境要求
+## Windows 安装包
+
+普通使用下载 `Soundweaver-0.1.0-Setup.exe` 并安装即可。安装包内含 Python 运行环境、FFmpeg 与 FFprobe，不需要另外安装 Python、配置 FFmpeg 或修改 PATH。默认安装到当前用户的 `%LOCALAPPDATA%\Programs\Soundweaver`，无需管理员权限。
+
+安装器检查 Microsoft Edge WebView2 Runtime；已有时直接使用，缺少时通过随包的微软引导程序联网安装。FFmpeg 与 FFprobe 已随包提供，不在安装时下载。现有工作区与设置仍保存在原 `AudioVTTForge` 用户数据目录；卸载程序保留这些用户数据。FFmpeg 来源、版本及许可证见 [第三方组件](THIRD_PARTY_NOTICES.md)。安装包及校验文件生成在 `dist/`。
+
+## 环境要求（源码运行）
 
 - Windows 10 / 11
 - Python 3.11 或更高版本
@@ -32,7 +38,7 @@
 - `pywebview>=6.2,<7` 和 Microsoft Edge WebView2 Runtime
 - PyInstaller，用于构建 EXE
 
-FFmpeg / FFprobe 优先读取 `AUDIOVTTFORGE_FFMPEG`、`AUDIOVTTFORGE_FFPROBE` 环境变量，其次使用 `D:\tools\ffmpeg\ffmpeg-9.0.1-essentials_build\bin\` 中的对应程序，再查找 `PATH`。可运行下方的 `doctor` 命令确认实际路径。Windows 11 和多数 Windows 10 电脑已安装 WebView2；缺失时请安装 Microsoft Edge WebView2 Evergreen Runtime。
+FFmpeg / FFprobe 优先使用用户显式指定的路径或 `AUDIOVTTFORGE_FFMPEG`、`AUDIOVTTFORGE_FFPROBE` 环境变量。安装版随后查找安装目录 `tools/ffmpeg/` 内的程序；源码运行保留 `D:\tools\ffmpeg\ffmpeg-9.0.1-essentials_build\bin\` 与 `PATH` 回退。可运行下方的 `doctor` 命令确认实际路径。
 
 ## 运行源码
 
@@ -156,7 +162,19 @@ python -m audiovttforge merge .\.result_parallel_work .\result.mp4
 
 `run` 会将 JSONL 事件写入输出目录的 `.result.events.jsonl`，失败时保留中间工作目录和每个分段的 FFmpeg 日志。任务 JSON 可设置 `"merge_subtitles": true`，成功后在 MP4 同目录生成同名 `.vtt` 文件；`--keep-work` 保留成功任务的中间文件，`--resume` 跳过已经生成的分段。`--workers 1` 适合复现问题，CLI 的标准输出也会逐行输出同样的机器可读事件。
 
-FFmpeg 和 FFprobe 默认使用源码中的 Windows 路径，也可以通过 `AUDIOVTTFORGE_FFMPEG`、`AUDIOVTTFORGE_FFPROBE` 环境变量或 CLI 参数覆盖。
+FFmpeg 和 FFprobe 可以通过 `AUDIOVTTFORGE_FFMPEG`、`AUDIOVTTFORGE_FFPROBE` 环境变量或 CLI 参数覆盖。
+
+## 构建安装包
+
+安装版版本由根目录 `VERSION` 定义，同时生成 EXE 与 Setup 的版本信息。执行：
+
+```powershell
+.\build-setup.ps1
+```
+
+脚本先构建目录版桌面应用，再加入 FFmpeg、FFprobe、原构建的许可证与源代码说明，最后使用 Inno Setup 生成 `dist/Soundweaver-0.1.0-Setup.exe`、SHA256 与构建记录。脚本不覆盖已有同名安装包，新产物会保留在 `tmp/setup-*/` 供检查。
+
+本机默认工具位于 `D:\tools`；其他环境通过 `-Python`、`-FfmpegRoot`、`-Compiler` 和 `-WebView2Bootstrapper` 指定。`FfmpegRoot` 需要包含 `bin/ffmpeg.exe`、`bin/ffprobe.exe`、`LICENSE` 与 `README.txt`；WebView2 引导程序须具备有效的微软签名，官方入口为 https://go.microsoft.com/fwlink/p/?LinkId=2124703 。临时构建文件统一放在 `tmp/`，安装包中的 FFmpeg 不写入系统工具目录或系统 PATH。
 
 ## 构建 EXE
 
@@ -178,7 +196,7 @@ dist\Soundweaver\Soundweaver.exe
 
 构建包含织声的 EXE 图标、窗口图标、网页图标与 Windows 产品名称。改名前的 `dist/AudioVTTForge/` 若仍存在，是旧产物；新版本请从 `dist/Soundweaver/Soundweaver.exe` 启动。
 
-当前打包元数据 `assets/branding/windows-version-info.txt` 的版本字段为 `0.0.0.0`，尚不能用于区分每次源码构建。已有 `dist` 目录不代表它已包含最新源码修改。
+`assets/branding/windows-version-info.txt` 为版本模板，构建脚本从 `VERSION` 生成实际元数据。已有 `dist` 目录不代表它已包含最新源码修改。
 
 `diagnose-temp.bat` 调用 [环境诊断脚本](scripts/Diagnose-Environment.ps1)，默认只读检查临时目录与两种新产物路径，明确显示“未测试写入权限”，最后等待 Enter。命令行加 `-NoPause` 可取消等待；`-TempRoot <已有目录>` 可指定诊断目录。诊断不会启动应用，也不能代替 WebView2、FFmpeg 或真实渲染验收。
 

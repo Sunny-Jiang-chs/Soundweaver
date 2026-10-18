@@ -6,7 +6,7 @@
 - `soundweaver.prompt.txt`：2026-10-13 使用 `gpt-image-2`、high 质量生成的完整提示词。
 - `../../audiovttforge/web_static/branding/soundweaver-256.png`：256×256、透明圆角的页面标识。
 - `../../audiovttforge/web_static/branding/soundweaver.ico`：Windows 窗口、任务栏、EXE 和网页图标，含 16/24/32/48/64/128/256 像素。
-- `windows-version-info.txt`：打包时写入 EXE 的中文产品名称和英文文件名。
+- `windows-version-info.txt`：EXE 元数据模板，构建时从根目录 `VERSION` 填入版本号，同时写入中文产品名称和英文文件名。
 
 图形为深蓝月色、青绿宽纸带交织，表现音频、字幕与画面的组合；与夜莺共用月牙和冷色系。派生 PNG 和 ICO 从母版等比缩放，圆角半径为边长的 20%，保留透明圆角。
 

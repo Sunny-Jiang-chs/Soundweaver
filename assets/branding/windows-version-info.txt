@@ -1,13 +1,13 @@
 # UTF-8
 VSVersionInfo(
-    ffi=FixedFileInfo(),
+    ffi=FixedFileInfo(filevers=(@VERSION_TUPLE@), prodvers=(@VERSION_TUPLE@)),
     kids=[
         StringFileInfo([
             StringTable('080404b0', [
                 StringStruct('FileDescription', '织声 · Soundweaver'),
                 StringStruct('ProductName', '织声 · Soundweaver'),
-                StringStruct('FileVersion', '0.0.0.0'),
-                StringStruct('ProductVersion', '0.0.0.0'),
+                StringStruct('FileVersion', '@VERSION@'),
+                StringStruct('ProductVersion', '@VERSION@'),
                 StringStruct('InternalName', 'Soundweaver'),
                 StringStruct('OriginalFilename', 'Soundweaver.exe'),
                 StringStruct('Comments', '夜莺媒体工坊'),

@@ -10,6 +10,12 @@ $dist = Join-Path $root "dist"
 $runRoot = Join-Path $root ("tmp\build\" + (Get-Date -Format "yyyyMMdd-HHmmss") + "-" + [guid]::NewGuid().ToString("N").Substring(0, 8))
 $work = Join-Path $runRoot "work"
 $staging = Join-Path $runRoot "staging"
+$version = ([IO.File]::ReadAllText((Join-Path $root "VERSION"))).Trim()
+if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "VERSION must contain a semantic version." }
+New-Item -ItemType Directory -Force -Path $work | Out-Null
+$versionInfo = Join-Path $work "windows-version-info.txt"
+$versionTemplate = [IO.File]::ReadAllText((Join-Path $root "assets\branding\windows-version-info.txt"))
+[IO.File]::WriteAllText($versionInfo, $versionTemplate.Replace('@VERSION_TUPLE@', ($version.Replace('.', ', ') + ', 0')).Replace('@VERSION@', $version), [Text.UTF8Encoding]::new($false))
 
 if (-not $Python) {
     if ($env:AUDIOVTTFORGE_PYTHON) {
@@ -81,7 +87,7 @@ $entry = Join-Path $root "desktop_entry.py"
 $windowArgs = @("--windowed")
 $extra += @(
     "--icon", "$root\audiovttforge\web_static\branding\soundweaver.ico",
-    "--version-file", "$root\assets\branding\windows-version-info.txt",
+    "--version-file", $versionInfo,
     "--collect-data", "webview",
     "--hidden-import", "webview.platforms.edgechromium",
     "--hidden-import", "webview.platforms.winforms"
